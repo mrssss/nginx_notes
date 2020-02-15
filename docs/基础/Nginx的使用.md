@@ -246,7 +246,19 @@ qniu     15255 15253  0 03:19 ?        00:00:00 nginx: worker process
 $ cd logs
 # 备份当前日志
 $ cp qniu_access.log bak.log
-$ nginx -s reload
+$ nginx -s reopen
 # 可以写成bash脚本然后放在crontab中
+```
+
+示例脚本：
+```shell
+#!/bin/bash
+LOGS_PATH=/usr/local/nginx/logs/history
+CUR_LOGS_PATH=/usr/local/nginx/logs
+YESTERDAY=$(date -d "yesterday" +%Y-%m-%d)
+mv ${CUR_LOGS_PATH}/access.log ${LOGS_PATH}/old_access_${YESTERDAY}.log
+mv ${CUR_LOGS_PATH}/error.log ${LOGS_PATH}/old_error_${YESTERDAY}.log
+## 向 NGINX 主进程发送 USR1 信号。USR1 信号是重新打开日志文件
+kill -USR1 $(cat /usr/local/nginx/logs/nginx.pid)
 ```
 
